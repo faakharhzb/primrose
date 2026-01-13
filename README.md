@@ -1,2 +1,2 @@
-# website
-my personal website
+# Sitegen
+A static website generator.
