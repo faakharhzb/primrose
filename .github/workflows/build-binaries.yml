@@ -68,7 +68,7 @@ jobs:
 
       - name: Install Windows system dependencies
         if: matrix.platform == 'windows'
-        run: choco install ccache -y
+        run: choco install ccache 7z -y
         shell: powershell
 
       - name: Install macOS system dependencies
@@ -82,7 +82,7 @@ jobs:
         run: |
             args=()
             [[ "${{ matrix.nuitka }}" == "true" ]] && args+=("--nuitka")
-            [[ "${{ matrix.clang }}" == "true" ]] && args+=("--compiler=clang")
+            [[ "${{ matrix.clang }}" == "true" ]] && args+=("--compiler clang")
             python dev.py --build "${args[@]}"
 
       - name: Make binaries executable
