@@ -45,7 +45,7 @@ def build(nuitka: bool, compiler: str) -> None:
                 compiler = "msvc=latest"
         compiler = "--" + compiler
 
-        os.system(f"{sys.executable} -m pip install nuitka")
+        print(os.system(f"{sys.executable} -m pip install nuitka"))
 
         cmd = [
             "nuitka",
@@ -57,7 +57,7 @@ def build(nuitka: bool, compiler: str) -> None:
         ]
         cmd = "".join(cmd)
     else:
-        os.system(f"{sys.executable} -m pip install pyinstaller")
+        print(os.system(f"{sys.executable} -m pip install pyinstaller"))
         cmd = [
             "pyinstaller",
             " --onefile",
@@ -67,7 +67,7 @@ def build(nuitka: bool, compiler: str) -> None:
         ]
         cmd = "".join(cmd)
 
-    os.system(cmd)
+    print(os.system(cmd))
 
 
 if __name__ == "__main__":
