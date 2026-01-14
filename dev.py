@@ -56,7 +56,7 @@ def build(nuitka: bool, compiler: str) -> None:
             " --assume-yes-for-downloads",
             " " + compiler,
             " --output-dir=dist",
-            " --output-filename=sitegen",
+            " --output-filename=sitegen" if sys.platform == "linux",
             " sitegen.py",
         ]
         cmd = "".join(cmd)
