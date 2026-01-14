@@ -49,16 +49,13 @@ def build(nuitka: bool, compiler: str) -> None:
 
         cmd = [
             "nuitka",
-            " --follow-imports",
-            " --mode=onefile",
+            " --onefile",
             " --assume-yes-for-downloads",
-            " --product-name=sitegen",
             " " + compiler,
             " --output-dir=dist",
             " sitegen.py",
         ]
         cmd = "".join(cmd)
-        print(cmd)
     else:
         os.system(f"{sys.executable} -m pip install pyinstaller")
         cmd = [
