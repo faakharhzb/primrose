@@ -57,7 +57,7 @@ def convert_md(files: list, output: str, content_dir: str) -> list:
 
                 html = [markdown.markdown(f.read()), html_path]
 
-        html_files.append(html)
+            html_files.append(html)
 
     return html_files
 
