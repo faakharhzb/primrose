@@ -108,7 +108,7 @@ if __name__ == "__main__":
 
     create_html_files(html_data, args.output)
 
-    print("HTML files created.")
+    print(f"{len(html_data)} HTML files created in directory: {os.path.abspath(args.output)}/")
 
     if args.start:
         try:
