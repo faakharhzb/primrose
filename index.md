@@ -1,2 +1,0 @@
-# [Faakhar Habeeb](./index.html)
-

@@ -43,24 +43,46 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args(sys.argv[1:])
 
 
-def get_source_files(directory: str) -> list[str]:
-    return glob.glob(
-        os.path.join(os.path.abspath(directory), "**", "*.md"),
-        recursive=True,
-    )
+def get_source_files(directory: str) -> dict[str, list[str]]:
+    files = {}
+    base_dir = os.path.abspath(directory)
+
+    for i in glob.iglob(f"{base_dir}\\**\\*.md", recursive=True):
+        dirname = os.path.dirname(i)
+        if dirname == os.path.abspath(base_dir):
+            dirname = "."
+        else:
+            dirname = dirname.split("\\")[-1]
+            dirname = os.path.join(".", dirname)
+
+        if dirname not in files:
+            files[dirname] = []
+
+        files[dirname].append(i)
+
+    return files
 
 
-def convert_md(files: list, output: str, content_dir: str, name: str) -> list:
+def create_index_files(files: dict[str, list[str]]) -> None:
+    index = "index.md"
+
+    for i, j in files.items():
+        if index not in os.listdir(os.path.abspath(i)):
+            j.append(index)
+
+            with open(os.path.join(i, index), "w") as f:
+                f.write("")
+
+
+def convert_md(
+    files: dict[str, list[str]], output: str, content_dir: str, name: str
+) -> list:
     html_files = []
-    header = f"# [{name}](./index.html)\n\n"
+    header = f"# [{name}](/index.html)\n\n"
+    print(header)
 
-    if "index.md" not in files:
-        files.append(os.path.abspath("index.md"))
-        with open(files[-1], "w") as f:
-            f.write("")
-
-    for i in files:
-        if not os.path.isdir(i):
+    for _, files in files.items():
+        for i in files:
             with open(i, "r") as f:
                 rel_path = os.path.relpath(i, content_dir)
                 base, _ = os.path.splitext(rel_path)
@@ -104,11 +126,15 @@ def start_server(port: int, directory: str) -> None:
 if __name__ == "__main__":
     args = parse_args()
     source_files = get_source_files(args.content_dir)
+
+    create_index_files(source_files)
     html_data = convert_md(source_files, args.output, args.content_dir, args.name)
 
     create_html_files(html_data, args.output)
 
-    print(f"{len(html_data)} HTML files created in directory: {os.path.abspath(args.output)}/")
+    print(
+        f"{len(html_data)} HTML files created in directory: {os.path.abspath(args.output)}/"
+    )
 
     if args.start:
         try:
