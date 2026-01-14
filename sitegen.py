@@ -20,6 +20,13 @@ def parse_args() -> argparse.Namespace:
         "--name", "-n", type=str, help="The name of the website.", default="My site"
     )
     parser.add_argument(
+        "--host",
+        "-H",
+        type=str,
+        help="the address where the website is hosted",
+        default="http://localhost",
+    )
+    parser.add_argument(
         "--port",
         "-p",
         type=int,
@@ -108,10 +115,14 @@ def create_html_files(data: list, output: str) -> None:
             f.write(content)
 
 
-def start_server(port: int, directory: str) -> None:
+def start_server(host: str, port: int, directory: str) -> None:
     os.chdir(directory)
     handler = http.server.SimpleHTTPRequestHandler
-    url = f"http://localhost:{port}"
+
+    url = f"{host}:{port}"
+    if not url.startswith("http"):
+        url = "https://" + url
+
     with socketserver.TCPServer(("", port), handler) as server:
         print(f"Serving at {url}")
         print("Press Ctrl+C to stop.")
@@ -137,7 +148,7 @@ if __name__ == "__main__":
 
     if args.start:
         try:
-            start_server(args.port, args.output)
+            start_server(args.host, args.port, args.output)
         except KeyboardInterrupt:
             print("\nServer closed. Exiting...")
             sys.exit()
