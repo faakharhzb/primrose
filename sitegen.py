@@ -57,7 +57,7 @@ def convert_md(files: list, output: str, content_dir: str, name: str) -> list:
     if "index.md" not in files:
         files.append(os.path.abspath("index.md"))
         with open(files[-1], "w") as f:
-            f.write(header)
+            f.write("")
 
     for i in files:
         if not os.path.isdir(i):
