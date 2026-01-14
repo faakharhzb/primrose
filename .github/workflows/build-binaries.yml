@@ -68,7 +68,7 @@ jobs:
 
       - name: Install Windows system dependencies
         if: matrix.platform == 'windows'
-        run: choco install ccache 7z -y
+        run: choco install ccache -y
         shell: powershell
 
       - name: Install macOS system dependencies
