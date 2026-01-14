@@ -5,7 +5,9 @@ import sys
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        "Sitegen dev script", usage="python dev.py ", description="Dev script for sitegen."
+        "Sitegen dev script",
+        usage="python dev.py ",
+        description="Dev script for sitegen.",
     )
     parser.add_argument(
         "--build", action="store_true", default=False, help="build binary for sitegen."
@@ -22,6 +24,7 @@ def parse_args() -> argparse.Namespace:
 
     return parser.parse_args(sys.argv[1:])
 
+
 def install_deps(deps: list[str] | str) -> None:
     if type(deps) == str:
         cmd = [sys.executable, "-m", "pip", "install", deps]
@@ -30,7 +33,8 @@ def install_deps(deps: list[str] | str) -> None:
 
     subprocess.run(cmd)
 
-def build(nuitka: bool=False, compiler: str) -> None:
+
+def build(nuitka: bool, compiler: str) -> None:
     if nuitka:
         if compiler == "gcc" and sys.platform == "win32":
             compiler = "mingw64"
@@ -43,10 +47,30 @@ def build(nuitka: bool=False, compiler: str) -> None:
 
         subprocess.run([sys.executable, "-m", "pip", "install", "nuitka"])
 
-        cmd = [sys.executable, "-m", "nuitka", "--follow-imports", "--mode=onefile", "--assume-yes-for-downloads", "--jobs=-1", "--product-name=sitegen", compiler, "--output-dir=dist" ,"sitegen.py"]
+        cmd = [
+            sys.executable,
+            "-m",
+            "nuitka",
+            "--follow-imports",
+            "--mode=onefile",
+            "--assume-yes-for-downloads",
+            "--jobs=-1",
+            "--product-name=sitegen",
+            compiler,
+            "--output-dir=dist",
+            "sitegen.py",
+        ]
     else:
         subprocess.run([sys.executable, "-m", "pip", "install", "pyinstaller"])
-        cmd = [sys.executable, "-m", "pyinstaller", "--onefile","--clean" , "--noconfirm", "sitegen.py"]
+        cmd = [
+            sys.executable,
+            "-m",
+            "pyinstaller",
+            "--onefile",
+            "--clean",
+            "--noconfirm",
+            "sitegen.py",
+        ]
 
     subprocess.run(cmd)
 
@@ -64,5 +88,3 @@ if __name__ == "__main__":
         print("Compilation complete. Results are available in ./dist")
     else:
         pass
-
-
