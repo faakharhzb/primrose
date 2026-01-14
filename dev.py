@@ -43,12 +43,15 @@ def build(nuitka: bool, compiler: str) -> None:
                 compiler = ""
             else:
                 compiler = "msvc=latest"
-        compiler = "--" + compiler
-
-        print(os.system(f"{sys.executable} -m pip install nuitka"))
+        if compiler:
+            compiler = "--" + compiler
+        else:
+            compiler = " "
 
         cmd = [
-            "nuitka",
+            sys.executable,
+            " -m",
+            " nuitka",
             " --onefile",
             " --assume-yes-for-downloads",
             " " + compiler,
@@ -56,8 +59,8 @@ def build(nuitka: bool, compiler: str) -> None:
             " sitegen.py",
         ]
         cmd = "".join(cmd)
+        print(cmd)
     else:
-        print(os.system(f"{sys.executable} -m pip install pyinstaller"))
         cmd = [
             "pyinstaller",
             " --onefile",
@@ -75,7 +78,7 @@ if __name__ == "__main__":
 
     if args.build:
         print("Installing dependencies...")
-        install_deps("markdown")
+        install_deps(["markdown", " nuitka", " pyinstaller"])
         print("Installed dependecies.", "\n")
 
         print("Beginning compilation...")
