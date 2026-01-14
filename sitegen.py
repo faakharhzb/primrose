@@ -36,7 +36,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--start",
         "-s",
-        type=bool,
         action="store_true",
         help="Option to launch a server on localhost",
         default=False,
