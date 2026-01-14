@@ -1,4 +1,4 @@
-import subprocess
+import os
 import argparse
 import sys
 
@@ -27,11 +27,11 @@ def parse_args() -> argparse.Namespace:
 
 def install_deps(deps: list[str] | str) -> None:
     if type(deps) == str:
-        cmd = [sys.executable, "-m", "pip", "install", deps]
+        cmd = f"{sys.executable} -m pip install {deps}"
     else:
-        cmd = [sys.executable, "-m", "pip", "install", *deps]
+        cmd = f"{sys.executable} -m pip install {''.join(deps)}"
 
-    subprocess.run(cmd)
+    os.system(cmd)
 
 
 def build(nuitka: bool, compiler: str) -> None:
@@ -45,30 +45,31 @@ def build(nuitka: bool, compiler: str) -> None:
                 compiler = "msvc=latest"
         compiler = "--" + compiler
 
-        subprocess.run([sys.executable, "-m", "pip", "install", "nuitka"])
+        os.system(f"{sys.executable} -m pip install nuitka")
 
         cmd = [
             "nuitka",
             "--follow-imports",
-            "--mode=onefile",
-            "--assume-yes-for-downloads",
-            "--jobs=-1",
-            "--product-name=sitegen",
-            compiler,
-            "--output-dir=dist",
-            "sitegen.py",
+            " --mode=onefile",
+            " --assume-yes-for-downloads",
+            " --product-name=sitegen",
+            " " + compiler,
+            " --output-dir=dist",
+            " sitegen.py",
         ]
+        cmd = "".join(cmd)
     else:
-        subprocess.run([sys.executable, "-m", "pip", "install", "pyinstaller"])
+        os.system(f"{sys.executable} -m pip install pyinstaller")
         cmd = [
             "pyinstaller",
-            "--onefile",
-            "--clean",
-            "--noconfirm",
-            "sitegen.py",
+            " --onefile",
+            " --clean",
+            " --noconfirm",
+            " sitegen.py",
         ]
+        cmd = "".join(cmd)
 
-    subprocess.run(cmd)
+    os.system(cmd)
 
 
 if __name__ == "__main__":
