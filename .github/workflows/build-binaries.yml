@@ -94,7 +94,7 @@ jobs:
         shell: bash
         run: |
           ls -lh
-          version=${GITHUB_REF#refs/tags/}
+          version=${GITHUB_REF_NAME:-${GITHUB_REF##*/}}
           extra="README.md LICENSE"
           cd dist
           cp ../{README.md,LICENSE} .
