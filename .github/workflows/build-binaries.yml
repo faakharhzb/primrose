@@ -92,6 +92,7 @@ jobs:
       - name: Archive files
         shell: bash
         run: |
+          ls -lh
           version=${GITHUB_REF#refs/tags/}
           extra="README.md LICENSE"
           cd dist
