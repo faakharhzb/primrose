@@ -17,6 +17,9 @@ def parse_args() -> argparse.Namespace:
         help="The directory containing the content files.",
     )
     parser.add_argument(
+        "--name", "-n", type=str, help="The name of the website.", default="My site"
+    )
+    parser.add_argument(
         "--port",
         "-p",
         type=int,
@@ -30,6 +33,14 @@ def parse_args() -> argparse.Namespace:
         help="the path where the output files will be stored.",
         default="output",
     )
+    parser.add_argument(
+        "--start",
+        "-s",
+        type=bool,
+        action="store_true",
+        help="Option to launch a server on localhost",
+        default=False,
+    )
     return parser.parse_args(sys.argv[1:])
 
 
@@ -40,13 +51,14 @@ def get_source_files(directory: str) -> list[str]:
     )
 
 
-def convert_md(files: list, output: str, content_dir: str) -> list:
+def convert_md(files: list, output: str, content_dir: str, name: str) -> list:
     html_files = []
+    header = f"# [{name}](./index.html)\n\n"
 
     if "index.md" not in files:
         files.append(os.path.abspath("index.md"))
         with open(files[-1], "w") as f:
-            f.write("Nothing to see here.")
+            f.write(header)
 
     for i in files:
         if not os.path.isdir(i):
@@ -55,7 +67,7 @@ def convert_md(files: list, output: str, content_dir: str) -> list:
                 base, _ = os.path.splitext(rel_path)
                 html_path = os.path.join(output, base + ".html")
 
-                html = [markdown.markdown(f.read()), html_path]
+                html = [markdown.markdown(header + f.read()), html_path]
 
             html_files.append(html)
 
@@ -64,7 +76,7 @@ def convert_md(files: list, output: str, content_dir: str) -> list:
 
 def create_html_files(data: list, output: str) -> None:
     if os.path.exists(output) and os.path.isdir(output):
-        for i in glob.iglob("output/**", recursive=True):
+        for i in glob.iglob(f"{output}/**", recursive=True):
             if os.path.isfile(i):
                 os.remove(i)
     else:
@@ -86,18 +98,22 @@ def start_server(port: int, directory: str) -> None:
 
         webbrowser.open(url)
 
+        server.allow_reuse_address = True
         server.serve_forever()
 
 
 if __name__ == "__main__":
     args = parse_args()
     source_files = get_source_files(args.content_dir)
-    html_data = convert_md(source_files, args.output, args.content_dir)
+    html_data = convert_md(source_files, args.output, args.content_dir, args.name)
 
     create_html_files(html_data, args.output)
 
-    try:
-        start_server(args.port, args.output)
-    except KeyboardInterrupt:
-        print("\nServer closed. Exiting...")
-        sys.exit()
+    print("HTML files created.")
+
+    if args.start:
+        try:
+            start_server(args.port, args.output)
+        except KeyboardInterrupt:
+            print("\nServer closed. Exiting...")
+            sys.exit()
