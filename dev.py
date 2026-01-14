@@ -49,7 +49,7 @@ def build(nuitka: bool, compiler: str) -> None:
 
         cmd = [
             "nuitka",
-            "--follow-imports",
+            " --follow-imports",
             " --mode=onefile",
             " --assume-yes-for-downloads",
             " --product-name=sitegen",
