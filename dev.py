@@ -48,8 +48,6 @@ def build(nuitka: bool, compiler: str) -> None:
         subprocess.run([sys.executable, "-m", "pip", "install", "nuitka"])
 
         cmd = [
-            sys.executable,
-            "-m",
             "nuitka",
             "--follow-imports",
             "--mode=onefile",
@@ -63,8 +61,6 @@ def build(nuitka: bool, compiler: str) -> None:
     else:
         subprocess.run([sys.executable, "-m", "pip", "install", "pyinstaller"])
         cmd = [
-            sys.executable,
-            "-m",
             "pyinstaller",
             "--onefile",
             "--clean",

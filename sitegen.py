@@ -79,7 +79,6 @@ def convert_md(
 ) -> list:
     html_files = []
     header = f"# [{name}](/index.html)\n\n"
-    print(header)
 
     for _, files in files.items():
         for i in files:
