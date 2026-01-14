@@ -58,6 +58,7 @@ def build(nuitka: bool, compiler: str) -> None:
             " sitegen.py",
         ]
         cmd = "".join(cmd)
+        print(cmd)
     else:
         os.system(f"{sys.executable} -m pip install pyinstaller")
         cmd = [
