@@ -1,2 +1,3 @@
 # Sitegen
-A static website generator.
+
+A static website generator made in python
