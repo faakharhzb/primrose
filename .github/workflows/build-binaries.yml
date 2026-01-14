@@ -82,7 +82,7 @@ jobs:
         run: |
             args=()
             [[ "${{ matrix.nuitka }}" == "true" ]] && args+=("--nuitka")
-            [[ "${{ matrix.clang }}" == "true" ]] && args+=("--clang")
+            [[ "${{ matrix.clang }}" == "true" ]] && args+=("--compiler=clang")
             python dev.py --build "${args[@]}"
 
       - name: Make binaries executable
