@@ -1,5 +1,6 @@
 import os
 import shutil
+import time
 import webbrowser
 import markdown
 import argparse
@@ -16,6 +17,7 @@ def parse_args() -> argparse.Namespace:
         "content_dir",
         type=str,
         help="The directory containing the content files.",
+        nargs="?",
     )
     parser.add_argument(
         "--name", "-n", type=str, help="The name of the website.", default="My site"
@@ -49,7 +51,7 @@ def parse_args() -> argparse.Namespace:
         default="themes/light_theme.css",
     )
     parser.add_argument(
-        "--start",
+        "--serve",
         "-s",
         action="store_true",
         help="Option to launch a server locally.",
@@ -120,8 +122,7 @@ def convert_md(
                 html_path = os.path.join(output, base + ".html")
 
                 body = markdown.markdown(header + f.read())
-                html = [
-                    f"""
+                html = f"""
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -133,11 +134,9 @@ def convert_md(
     {body}
 </body>
 </html>
-""",
-                    html_path,
-                ]
+"""
 
-            html_files.append(html)
+            html_files.append([html, html_path])
 
     return html_files
 
@@ -150,6 +149,7 @@ def create_html_files(data: list) -> None:
 
 
 def start_server(host: str, port: int, directory: str) -> None:
+    time.sleep(0.5)
     os.chdir(directory)
     handler = http.server.SimpleHTTPRequestHandler
 
@@ -166,23 +166,23 @@ def start_server(host: str, port: int, directory: str) -> None:
 
 if __name__ == "__main__":
     args = parse_args()
-    print(args.theme)
-    print()
-    source_files = get_source_files(args.content_dir)
 
-    setup_output_dir(args.output, args.theme)
-    create_index_files(source_files)
-    html_data = convert_md(
-        source_files, args.output, args.content_dir, args.name, args.theme
-    )
+    if args.content_dir:
+        source_files = get_source_files(args.content_dir)
 
-    create_html_files(html_data)
+        setup_output_dir(args.output, args.theme)
+        create_index_files(source_files)
+        html_data = convert_md(
+            source_files, args.output, args.content_dir, args.name, args.theme
+        )
 
-    print(
-        f"{len(html_data)} HTML files created in directory: {os.path.abspath(args.output)}/\n"
-    )
+        create_html_files(html_data)
 
-    if args.start:
+        print(
+            f"{len(html_data)} HTML files created in directory: {os.path.abspath(args.output)}/\n"
+        )
+
+    if args.serve:
         try:
             start_server(args.host, args.port, args.output)
         except KeyboardInterrupt:
