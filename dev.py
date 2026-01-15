@@ -26,7 +26,7 @@ def parse_args() -> argparse.Namespace:
 
 
 def install_deps(deps: list[str] | str) -> None:
-    if type(deps) == str:
+    if type(deps) is str:
         cmd = f"{sys.executable} -m pip install {deps}"
     else:
         cmd = f"{sys.executable} -m pip install {''.join(deps)}"
