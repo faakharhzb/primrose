@@ -10,7 +10,7 @@ import socketserver
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser("sitegen")
+    parser = argparse.ArgumentParser("primrose")
 
     parser.add_argument(
         "content_dir",

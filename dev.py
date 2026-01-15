@@ -5,12 +5,12 @@ import sys
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        "Sitegen dev script",
+        "primrose dev script",
         usage="python dev.py ",
-        description="Dev script for sitegen.",
+        description="Dev script for primrose.",
     )
     parser.add_argument(
-        "--build", action="store_true", default=False, help="build binary for sitegen."
+        "--build", action="store_true", default=False, help="build binary for primrose."
     )
     parser.add_argument(
         "--nuitka", action="store_true", default=False, help="Build using nuitka."
@@ -56,8 +56,8 @@ def build(nuitka: bool, compiler: str) -> None:
             " --assume-yes-for-downloads",
             " " + compiler,
             " --output-dir=dist",
-            " --output-filename=sitegen" if sys.platform == "linux" else " ",
-            " sitegen.py",
+            " --output-filename=primrose" if sys.platform == "linux" else " ",
+            " primrose.py",
         ]
         cmd = "".join(cmd)
         print(cmd)
@@ -67,7 +67,7 @@ def build(nuitka: bool, compiler: str) -> None:
             " --onefile",
             " --clean",
             " --noconfirm",
-            " sitegen.py",
+            " primrose.py",
         ]
         cmd = "".join(cmd)
 
