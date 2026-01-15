@@ -74,7 +74,7 @@ jobs:
 
       - name: Make binaries executable
         if: matrix.platform == 'macos' || matrix.platform == 'linux'
-        run: chmod +x ./dist/sitegen || true
+        run: chmod +x ./dist/primrose || true
 
       - name: Archive files
         shell: bash
@@ -85,16 +85,16 @@ jobs:
           cd dist
           cp ../{README.md,LICENSE} .
           if [[ "${{ matrix.platform }}" == "linux" ]]; then
-            tar -czf "sitegen-$version-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz" sitegen $extra
+            tar -czf "primrose-$version-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz" primrose $extra
 
           elif [[ "${{ matrix.platform }}" == "windows" ]]; then
-            7z a "sitegen-$version-${{ matrix.platform }}-${{ matrix.arch }}.zip" sitegen.exe $extra
+            7z a "primrose-$version-${{ matrix.platform }}-${{ matrix.arch }}.zip" primrose.exe $extra
 
           elif [[ "${{ matrix.os }}" == "macos-15-intel" ]]; then
-            zip "sitegen-$version-${{ matrix.platform }}-${{ matrix.arch }}.zip" sitegen $extra
+            zip "primrose-$version-${{ matrix.platform }}-${{ matrix.arch }}.zip" primrose $extra
 
           else
-            zip "sitegen-$version-${{ matrix.platform }}-${{ matrix.arch }}.zip" sitegen $extra
+            zip "primrose-$version-${{ matrix.platform }}-${{ matrix.arch }}.zip" primrose $extra
 
           fi
           cd ..
