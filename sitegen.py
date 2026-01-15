@@ -1,4 +1,5 @@
 import os
+import shutil
 import webbrowser
 import markdown
 import argparse
@@ -24,7 +25,7 @@ def parse_args() -> argparse.Namespace:
         "-H",
         type=str,
         help="the address where the website is hosted",
-        default="http://localhost",
+        default="localhost",
     )
     parser.add_argument(
         "--port",
@@ -41,10 +42,17 @@ def parse_args() -> argparse.Namespace:
         default="output",
     )
     parser.add_argument(
+        "--theme",
+        "-t",
+        type=str,
+        help="The css theme file.",
+        default="themes/light_theme.css",
+    )
+    parser.add_argument(
         "--start",
         "-s",
         action="store_true",
-        help="Option to launch a server on localhost",
+        help="Option to launch a server locally.",
         default=False,
     )
     return parser.parse_args(sys.argv[1:])
@@ -54,12 +62,12 @@ def get_source_files(directory: str) -> dict[str, list[str]]:
     files = {}
     base_dir = os.path.abspath(directory)
 
-    for i in glob.iglob(f"{base_dir}\\**\\*.md", recursive=True):
+    for i in glob.iglob(os.path.join(base_dir, "**", "*.md"), recursive=True):
         dirname = os.path.dirname(i)
         if dirname == os.path.abspath(base_dir):
             dirname = "."
         else:
-            dirname = dirname.split("\\")[-1]
+            dirname = os.path.basename(dirname)
             dirname = os.path.join(".", dirname)
 
         if dirname not in files:
@@ -73,16 +81,33 @@ def get_source_files(directory: str) -> dict[str, list[str]]:
 def create_index_files(files: dict[str, list[str]]) -> None:
     index = "index.md"
 
-    for i, j in files.items():
-        if index not in os.listdir(os.path.abspath(i)):
-            j.append(index)
+    for dirname, files in files.items():
+        if files:
+            index_path = os.path.join(dirname, index)
 
-            with open(os.path.join(i, index), "w") as f:
-                f.write("")
+            if not os.path.exists(index_path):
+                with open(index_path, "w") as f:
+                    f.write(" ")
+
+
+def setup_output_dir(output: str, theme: str) -> None:
+    if os.path.exists(output) and os.path.isdir(output):
+        for i in glob.iglob(os.path.join(output, "**"), recursive=True):
+            if os.path.isfile(i):
+                os.remove(i)
+    else:
+        os.makedirs(output)
+
+    os.makedirs(os.path.join(output, "themes"), exist_ok=True)
+    shutil.copyfile(
+        os.path.abspath(theme), os.path.abspath(os.path.join(output, theme))
+    )
+
+    os.makedirs(os.path.join(output, "assets"), exist_ok=True)
 
 
 def convert_md(
-    files: dict[str, list[str]], output: str, content_dir: str, name: str
+    files: dict[str, list[str]], output: str, content_dir: str, name: str, theme: str
 ) -> list:
     html_files = []
     header = f"# [{name}](/index.html)\n\n"
@@ -94,21 +119,30 @@ def convert_md(
                 base, _ = os.path.splitext(rel_path)
                 html_path = os.path.join(output, base + ".html")
 
-                html = [markdown.markdown(header + f.read()), html_path]
+                body = markdown.markdown(header + f.read())
+                html = [
+                    f"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{name}</title>
+    <link rel="stylesheet" href="{theme}">
+</head>
+<body>
+    {body}
+</body>
+</html>
+""",
+                    html_path,
+                ]
 
             html_files.append(html)
 
     return html_files
 
 
-def create_html_files(data: list, output: str) -> None:
-    if os.path.exists(output) and os.path.isdir(output):
-        for i in glob.iglob(f"{output}/**", recursive=True):
-            if os.path.isfile(i):
-                os.remove(i)
-    else:
-        os.makedirs(output)
-
+def create_html_files(data: list) -> None:
     for content, path in data:
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w") as f:
@@ -119,31 +153,33 @@ def start_server(host: str, port: int, directory: str) -> None:
     os.chdir(directory)
     handler = http.server.SimpleHTTPRequestHandler
 
-    url = f"{host}:{port}"
-    if not url.startswith("http"):
-        url = "https://" + url
-
-    with socketserver.TCPServer(("", port), handler) as server:
+    host = host.replace("http://", "").replace("https://", "")
+    url = f"http://{host}:{port}"
+    with socketserver.TCPServer((host, port), handler) as server:
         print(f"Serving at {url}")
-        print("Press Ctrl+C to stop.")
+        print("Press Ctrl+C to stop.\n")
 
         webbrowser.open(url)
 
-        server.allow_reuse_address = True
         server.serve_forever()
 
 
 if __name__ == "__main__":
     args = parse_args()
+    print(args.theme)
+    print()
     source_files = get_source_files(args.content_dir)
 
+    setup_output_dir(args.output, args.theme)
     create_index_files(source_files)
-    html_data = convert_md(source_files, args.output, args.content_dir, args.name)
+    html_data = convert_md(
+        source_files, args.output, args.content_dir, args.name, args.theme
+    )
 
-    create_html_files(html_data, args.output)
+    create_html_files(html_data)
 
     print(
-        f"{len(html_data)} HTML files created in directory: {os.path.abspath(args.output)}/"
+        f"{len(html_data)} HTML files created in directory: {os.path.abspath(args.output)}/\n"
     )
 
     if args.start:
