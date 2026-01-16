@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    name: Build (${{ matrix.os }}, ${{ matrix.python-version }}${{ matrix.clang && format(', {0}', matrix.clang-version) || '' }})
+    name: Build (${{ matrix.os }}, ${{ matrix.python-version }})
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-15, macos-15-intel]
@@ -18,24 +18,32 @@ jobs:
             arch: x86-64
             python-version: 3.13
             nuitka: true
+            archive_ext: 'tar.gz'
+            archive_cmd: 'tar -czf'
 
           - os: windows-latest
             platform: windows
             arch: x86-64
-            python-version: 3.12   # https://github.com/Nuitka/Nuitka/issues/3234
+            python-version: 3.12
             nuitka: true
+            archive_ext: 'zip'
+            archive_cmd: '7z a'
 
           - os: macos-15
             platform: macos
-            arch: ARM64
+            arch: arm64
             python-version: 3.13
             nuitka: false
+            archive_ext: 'zip'
+            archive_cmd: 'zip -r'
 
           - os: macos-15-intel
             platform: macos
             arch: x86-64
             python-version: 3.13
             nuitka: false
+            archive_ext: 'zip'
+            archive_cmd: 'zip -r'
 
     runs-on: ${{ matrix.os }}
     permissions:
@@ -81,31 +89,19 @@ jobs:
         run: |
           ls -lh
           version=${GITHUB_REF_NAME:-${GITHUB_REF##*/}}
-          extra="README.md LICENSE"
+          extra="README.md LICENSE themes"
           cd dist
-          cp ../{README.md,LICENSE} .
-          if [[ "${{ matrix.platform }}" == "linux" ]]; then
-            tar -czf "primrose-$version-${{ matrix.platform }}-${{ matrix.arch }}.tar.gz" primrose $extra
+          cp -r ../{README.md,LICENSE, themes} .
+          ${{ matrix.archive_cmd }} primrose-${version}-${{ matrix.platform }}-${{ matrix.arch }}.${{ matrix.archive_ext }} primrose* $extra
 
-          elif [[ "${{ matrix.platform }}" == "windows" ]]; then
-            7z a "primrose-$version-${{ matrix.platform }}-${{ matrix.arch }}.zip" primrose.exe $extra
-
-          elif [[ "${{ matrix.os }}" == "macos-15-intel" ]]; then
-            zip "primrose-$version-${{ matrix.platform }}-${{ matrix.arch }}.zip" primrose $extra
-
-          else
-            zip "primrose-$version-${{ matrix.platform }}-${{ matrix.arch }}.zip" primrose $extra
-
-          fi
+          rm -rf ../{README.md,LICENSE, themes}
           cd ..
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: dist-${{ matrix.os }}-${{ matrix.arch }}
-          path: |
-            ./dist/*.zip
-            ./dist/*.tar.gz
+          path: ./dist/*
           compression-level: 0
 
   draft-release:
@@ -138,7 +134,7 @@ jobs:
       - name: Draft a release
         uses: softprops/action-gh-release@v2
         with:
-          name: '${{ steps.extract_version.outputs.version }} [DRAFTED BY CI]'
+          name: 'version ${{ steps.extract_version.outputs.version }}'
           tag_name: '${{ steps.extract_version.outputs.version }}'
           target_commitish: ${{ github.sha }}
           draft: true
