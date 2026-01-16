@@ -1,5 +1,6 @@
 import os
 import shutil
+import re
 import time
 import webbrowser
 import markdown
@@ -48,7 +49,7 @@ def parse_args() -> argparse.Namespace:
         "-t",
         type=str,
         help="The css theme file.",
-        default="themes/light_theme.css",
+        default=os.path.join(os.path.dirname(__file__), "themes", "light_theme.css"),
     )
     parser.add_argument(
         "--serve",
@@ -97,13 +98,21 @@ def setup_output_dir(output: str, theme: str) -> None:
         for i in glob.iglob(os.path.join(output, "**"), recursive=True):
             if os.path.isfile(i):
                 os.remove(i)
+
     else:
         os.makedirs(output)
 
+    if not os.path.isabs(theme):
+        project_dir = os.path.dirname(__file__)
+        theme_path = os.path.join(project_dir, theme)
+    else:
+        theme_path = theme
+
+    theme_path = os.path.abspath(theme_path)
+
     os.makedirs(os.path.join(output, "themes"), exist_ok=True)
-    shutil.copyfile(
-        os.path.abspath(theme), os.path.abspath(os.path.join(output, theme))
-    )
+    dest_path = os.path.abspath(os.path.join(output, "themes", os.path.basename(theme)))
+    shutil.copyfile(theme_path, dest_path)
 
     os.makedirs(os.path.join(output, "assets"), exist_ok=True)
 
@@ -114,15 +123,45 @@ def convert_md(
     html_files = []
     header = f"# [{name}](/index.html)\n\n"
 
+    theme = os.path.join(
+        os.path.basename(os.path.dirname(theme)),
+        os.path.basename(theme),
+    )
+
+    asset_dir = os.path.join(output, "assets")
+    pattern = re.compile(
+        r"!\[.*?\]\((?!https?://)(.*?)\)"
+        r'|<img[^>]+src="(?!https?://)(.*?)"'
+        r'|href="(?!https?://|mailto:)(.*?)"'
+    )
+
     for _, files in files.items():
         for i in files:
             with open(i, "r") as f:
-                rel_path = os.path.relpath(i, content_dir)
-                base, _ = os.path.splitext(rel_path)
-                html_path = os.path.join(output, base + ".html")
+                text = f.read()
 
-                body = markdown.markdown(header + f.read())
-                html = f"""
+            matches = pattern.findall(text)
+            if matches:
+                for match in matches:
+                    asset_path = next((j for j in match if j), None)
+                    if asset_path:
+                        abs_path = os.path.join(content_dir, asset_path)
+                        if os.path.exists(abs_path):
+                            dest_path = os.path.join(
+                                asset_dir, os.path.basename(asset_path)
+                            )
+                            shutil.copyfile(abs_path, dest_path)
+
+                            text = text.replace(
+                                asset_path, f"assets/{os.path.basename(asset_path)}"
+                            )
+
+            rel_path = os.path.relpath(i, content_dir)
+            base, _ = os.path.splitext(rel_path)
+            html_path = os.path.join(output, base + ".html")
+
+            body = markdown.markdown(header + text)
+            html = f"""
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -149,7 +188,7 @@ def create_html_files(data: list) -> None:
 
 
 def start_server(host: str, port: int, directory: str) -> None:
-    time.sleep(0.5)
+    time.sleep(1)
     os.chdir(directory)
     handler = http.server.SimpleHTTPRequestHandler
 
