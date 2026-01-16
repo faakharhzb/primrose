@@ -97,13 +97,7 @@ jobs:
 
           rm -rf ../README.md ../LICENSE ../themes 
           cd ..
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist-${{ matrix.os }}-${{ matrix.arch }}
-          path: ./dist/*
-          compression-level: 0
+          
 
   draft-release:
     name: Draft GitHub Release
