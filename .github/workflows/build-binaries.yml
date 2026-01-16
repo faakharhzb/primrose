@@ -91,10 +91,11 @@ jobs:
           version=${GITHUB_REF_NAME:-${GITHUB_REF##*/}}
           extra="README.md LICENSE themes"
           cd dist
-          cp -r ../{README.md,LICENSE, themes} .
+          cp -r ../README.md ../LICENSE ../themes .
+          
           ${{ matrix.archive_cmd }} primrose-${version}-${{ matrix.platform }}-${{ matrix.arch }}.${{ matrix.archive_ext }} primrose* $extra
 
-          rm -rf ../{README.md,LICENSE, themes}
+          rm -rf ../README.md ../LICENSE ../themes 
           cd ..
 
       - name: Upload build artifact
