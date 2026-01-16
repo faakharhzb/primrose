@@ -87,7 +87,6 @@ jobs:
       - name: Archive files
         shell: bash
         run: |
-          ls -lh
           version=${GITHUB_REF_NAME:-${GITHUB_REF##*/}}
           extra="README.md LICENSE themes"
           cd dist
@@ -95,8 +94,17 @@ jobs:
           
           ${{ matrix.archive_cmd }} primrose-${version}-${{ matrix.platform }}-${{ matrix.arch }}.${{ matrix.archive_ext }} primrose* $extra
 
-          rm -rf ../README.md ../LICENSE ../themes 
+          rm -rf README.md LICENSE themes 
           cd ..
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.os }}
+          path: |
+            ./dist/*.zip
+            ./dist/*.tar.gz
+          compression-level: 0
           
 
   draft-release:
