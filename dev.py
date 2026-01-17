@@ -54,6 +54,7 @@ def build(nuitka: bool, compiler: str) -> None:
             " nuitka",
             " --onefile",
             " --assume-yes-for-downloads",
+            " --follow-imports",
             " " + compiler,
             " --output-dir=dist",
             " --output-filename=primrose" if sys.platform == "linux" else " ",
@@ -71,7 +72,7 @@ def build(nuitka: bool, compiler: str) -> None:
         ]
         cmd = "".join(cmd)
 
-    print(os.system(cmd))
+    os.system(cmd)
 
 
 if __name__ == "__main__":

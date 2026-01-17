@@ -15,35 +15,35 @@ jobs:
         include:
           - os: ubuntu-latest
             platform: linux
-            arch: x86-64
+            arch: x64
             python-version: 3.13
-            nuitka: true
             archive_ext: 'tar.gz'
             archive_cmd: 'tar -czf'
+            ext: ""
 
           - os: windows-latest
             platform: windows
-            arch: x86-64
+            arch: x64
             python-version: 3.12
-            nuitka: true
             archive_ext: 'zip'
             archive_cmd: '7z a'
+            ext: ".exe"
 
           - os: macos-15
             platform: macos
             arch: arm64
             python-version: 3.13
-            nuitka: false
             archive_ext: 'zip'
             archive_cmd: 'zip -r'
+            ext: ""
 
           - os: macos-15-intel
             platform: macos
-            arch: x86-64
+            arch: x64
             python-version: 3.13
-            nuitka: false
             archive_ext: 'zip'
             archive_cmd: 'zip -r'
+            ext: ""
 
     runs-on: ${{ matrix.os }}
     permissions:
@@ -57,6 +57,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+          architecture: ${{ matrix.arch }}
 
       - name: Install Linux system dependencies
         if: matrix.platform == 'linux'
@@ -75,10 +76,7 @@ jobs:
 
       - name: Run build script
         shell: bash
-        run: |
-            args=()
-            [[ "${{ matrix.nuitka }}" == "true" ]] && args+=("--nuitka")
-            python dev.py --build "${args[@]}"
+        run: python dev.py --build --nuitka
 
       - name: Make binaries executable
         if: matrix.platform == 'macos' || matrix.platform == 'linux'
@@ -92,9 +90,9 @@ jobs:
           cd dist
           cp -r ../README.md ../LICENSE ../themes .
           
-          ${{ matrix.archive_cmd }} primrose-${version}-${{ matrix.platform }}-${{ matrix.arch }}.${{ matrix.archive_ext }} primrose* $extra
+          ${{ matrix.archive_cmd }} primrose-${version}-${{ matrix.platform }}-${{ matrix.arch }}.${{ matrix.archive_ext }} primrose${{ matrix.ext }} $extra
 
-          rm -rf README.md LICENSE themes 
+          rm -rf README.md LICENSE themes
           cd ..
 
       - name: Upload build artifact
