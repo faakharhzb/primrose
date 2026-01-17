@@ -6,6 +6,8 @@ on:
       - '[0-9]*.[0-9]*.[0-9]*'
     branches:
       - main
+    paths:
+      - **/*.py
 
 
 jobs:
@@ -108,6 +110,7 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
+          name: primrose-${version}-${{ matrix.platform }}-${{ matrix.arch }}.${{ matrix.archive_ext }}
           path: |
             ./dist/*.zip
             ./dist/*.tar.gz
