@@ -8,6 +8,7 @@ on:
       - main
     paths:
       - **/*.py
+      - .github/workflows/*.yml
 
 
 jobs:
@@ -32,6 +33,14 @@ jobs:
             archive_ext: 'tar.gz'
             archive_cmd: 'tar -czf'
             ext: ""
+
+          - os: windows-latest
+            platform: windows
+            arch: x64
+            python-version: 3.12
+            archive_ext: 'zip'
+            archive_cmd: '7z a'
+            ext: ".exe"
 
           - os: windows-11-arm
             platform: windows
@@ -110,7 +119,7 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: primrose-${version}-${{ matrix.platform }}-${{ matrix.arch }}.${{ matrix.archive_ext }}
+          name: dist-${{ matrix.os }}
           path: |
             ./dist/*.zip
             ./dist/*.tar.gz
