@@ -21,7 +21,11 @@ def parse_args(cwd: str) -> argparse.Namespace:
         nargs="?",
     )
     parser.add_argument(
-        "--name", "-n", type=str, help="The name of the website.", default="My site"
+        "--name",
+        "-n",
+        type=str,
+        help="The name of the website.",
+        default="My site",
     )
     parser.add_argument(
         "--host",
@@ -65,7 +69,9 @@ def get_source_files(content_dir: str) -> dict[str, list[str]]:
     files = {}
     print(content_dir)
 
-    for i in glob.iglob(os.path.join(content_dir, "**", "*.md"), recursive=True):
+    for i in glob.iglob(
+        os.path.join(content_dir, "**", "*.md"), recursive=True
+    ):
         dirname = os.path.dirname(i)
         if dirname == os.path.abspath(content_dir):
             dirname = "."
@@ -112,14 +118,20 @@ def setup_output_dir(output: str, theme: str) -> None:
     theme_path = os.path.abspath(theme_path)
 
     os.makedirs(os.path.join(output, "themes"), exist_ok=True)
-    dest_path = os.path.abspath(os.path.join(output, "themes", os.path.basename(theme)))
+    dest_path = os.path.abspath(
+        os.path.join(output, "themes", os.path.basename(theme))
+    )
     shutil.copyfile(theme_path, dest_path)
 
     os.makedirs(os.path.join(output, "assets"), exist_ok=True)
 
 
 def convert_md(
-    files: dict[str, list[str]], output: str, content_dir: str, name: str, theme: str
+    files: dict[str, list[str]],
+    output: str,
+    content_dir: str,
+    name: str,
+    theme: str,
 ) -> list:
     html_files = []
     header = f"# [{name}](/index.html)\n\n"
@@ -154,7 +166,8 @@ def convert_md(
                             shutil.copyfile(abs_path, dest_path)
 
                             text = text.replace(
-                                asset_path, f"assets/{os.path.basename(asset_path)}"
+                                asset_path,
+                                f"assets/{os.path.basename(asset_path)}",
                             )
 
             rel_path = os.path.relpath(i, content_dir)
@@ -216,7 +229,11 @@ if __name__ == "__main__":
         setup_output_dir(args.output, args.theme)
         create_index_files(source_files)
         html_data = convert_md(
-            source_files, args.output, args.content_dir, args.name, args.theme
+            source_files,
+            args.output,
+            args.content_dir,
+            args.name,
+            args.theme,
         )
 
         create_html_files(html_data)

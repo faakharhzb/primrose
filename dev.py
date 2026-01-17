@@ -10,10 +10,16 @@ def parse_args() -> argparse.Namespace:
         description="Dev script for primrose.",
     )
     parser.add_argument(
-        "--build", action="store_true", default=False, help="build binary for primrose."
+        "--build",
+        action="store_true",
+        default=False,
+        help="build binary for primrose.",
     )
     parser.add_argument(
-        "--nuitka", action="store_true", default=False, help="Build using nuitka."
+        "--nuitka",
+        action="store_true",
+        default=False,
+        help="Build using nuitka.",
     )
     parser.add_argument(
         "--compiler",
@@ -29,7 +35,7 @@ def install_deps(deps: list[str] | str) -> None:
     if type(deps) is str:
         cmd = f"{sys.executable} -m pip install {deps}"
     else:
-        cmd = f"{sys.executable} -m pip install {''.join(deps)}"
+        cmd = f"{sys.executable} -m pip install {' '.join(deps)}"
 
     os.system(cmd)
 
@@ -50,28 +56,26 @@ def build(nuitka: bool, compiler: str) -> None:
 
         cmd = [
             sys.executable,
-            " -m",
-            " nuitka",
-            " --onefile",
-            " --assume-yes-for-downloads",
-            " --follow-imports",
-            " " + compiler,
-            " --output-dir=dist",
-            " --output-filename=primrose" if sys.platform == "linux" else " ",
-            " primrose.py",
+            "-m",
+            "nuitka",
+            "--onefile",
+            "--assume-yes-for-downloads",
+            "--follow-imports",
+            compiler,
+            "--output-dir=dist",
+            f"--output-filename={'primrose.exe' if sys.platform == 'win32' else 'primrose'}",
+            "primrose.py",
         ]
-        cmd = "".join(cmd)
-        print(cmd)
     else:
         cmd = [
             "pyinstaller",
-            " --onefile",
-            " --clean",
-            " --noconfirm",
-            " primrose.py",
+            "--onefile",
+            "--clean",
+            "--noconfirm",
+            "primrose.py",
         ]
-        cmd = "".join(cmd)
 
+    cmd = " ".join(cmd)
     os.system(cmd)
 
 
@@ -80,7 +84,7 @@ if __name__ == "__main__":
 
     if args.build:
         print("Installing dependencies...")
-        install_deps(["markdown", " nuitka", " pyinstaller"])
+        install_deps(["markdown", "nuitka", "pyinstaller"])
         print("Installed dependecies.", "\n")
 
         print("Beginning compilation...")
