@@ -11,7 +11,7 @@ import http.server
 import socketserver
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(cwd: str) -> argparse.Namespace:
     parser = argparse.ArgumentParser("primrose")
 
     parser.add_argument(
@@ -42,14 +42,14 @@ def parse_args() -> argparse.Namespace:
         "-o",
         type=str,
         help="the path where the output files will be stored.",
-        default="output",
+        default=os.path.join(cwd, "output"),
     )
     parser.add_argument(
         "--theme",
         "-t",
         type=str,
         help="The css theme file.",
-        default=os.path.join(os.path.dirname(__file__), "themes", "light_theme.css"),
+        default=os.path.join(cwd, "themes", "light_theme.css"),
     )
     parser.add_argument(
         "--serve",
@@ -61,13 +61,13 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args(sys.argv[1:])
 
 
-def get_source_files(directory: str) -> dict[str, list[str]]:
+def get_source_files(content_dir: str) -> dict[str, list[str]]:
     files = {}
-    base_dir = os.path.abspath(directory)
+    print(content_dir)
 
-    for i in glob.iglob(os.path.join(base_dir, "**", "*.md"), recursive=True):
+    for i in glob.iglob(os.path.join(content_dir, "**", "*.md"), recursive=True):
         dirname = os.path.dirname(i)
-        if dirname == os.path.abspath(base_dir):
+        if dirname == os.path.abspath(content_dir):
             dirname = "."
         else:
             dirname = os.path.basename(dirname)
@@ -103,7 +103,8 @@ def setup_output_dir(output: str, theme: str) -> None:
         os.makedirs(output)
 
     if not os.path.isabs(theme):
-        project_dir = os.path.dirname(__file__)
+        project_dir = os.path.dirname(output)
+        print(project_dir, "hi")
         theme_path = os.path.join(project_dir, theme)
     else:
         theme_path = theme
@@ -187,9 +188,9 @@ def create_html_files(data: list) -> None:
             f.write(content)
 
 
-def start_server(host: str, port: int, directory: str) -> None:
+def start_server(host: str, port: int, output_dir: str) -> None:
     time.sleep(1)
-    os.chdir(directory)
+    os.chdir(output_dir)
     handler = http.server.SimpleHTTPRequestHandler
 
     host = host.replace("http://", "").replace("https://", "")
@@ -204,7 +205,10 @@ def start_server(host: str, port: int, directory: str) -> None:
 
 
 if __name__ == "__main__":
-    args = parse_args()
+    cwd = os.path.abspath(
+        os.path.dirname(sys.argv[0])
+    )  # File doesnt work properly on nuitka builds
+    args = parse_args(cwd)
 
     if args.content_dir:
         source_files = get_source_files(args.content_dir)
