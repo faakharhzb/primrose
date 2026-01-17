@@ -7,8 +7,8 @@ on:
     branches:
       - main
     paths:
-      - **/*.py
-      - .github/workflows/*.yml
+      - '**/*.py'
+      - '.github/workflows/*.yml'
 
 
 jobs:
